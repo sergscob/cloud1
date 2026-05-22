@@ -56,9 +56,18 @@ services:
     networks:
       - internal
 
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+
 volumes:
   wordpress_data:
   mariadb_data:
+  certbot_www:
+  certbot_conf:
 
 networks:
   internal:

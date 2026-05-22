@@ -1,0 +1,65 @@
+services:
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+      - phpmyadmin
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - internal
+
+  wordpress:
+    build: ./wordpress
+    container_name: wordpress
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - internal
+
+  mariadb:
+    build: ./mariadb
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - internal
+
+  phpmyadmin:
+    build: ./phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    environment:
+      PMA_HOST: mariadb
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - internal
+
+volumes:
+  wordpress_data:
+  mariadb_data:
+
+networks:
+  internal:
+    driver: bridge

@@ -3,14 +3,16 @@ services:
     build: ./nginx
     container_name: nginx
     restart: unless-stopped
-    depends_on:
-      - wordpress
-      - phpmyadmin
+    # depends_on:
+    #   - wordpress
+    #   - phpmyadmin
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - wordpress_data:/var/www/html
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt      
     networks:
       - internal
 
@@ -62,6 +64,8 @@ services:
     volumes:
       - certbot_www:/var/www/certbot
       - certbot_conf:/etc/letsencrypt
+    networks:
+      - internal      
 
 volumes:
   wordpress_data:

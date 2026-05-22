@@ -1,5 +1,8 @@
 FROM nginx:stable-alpine
 
-COPY start.conf /etc/nginx/conf.d/default.conf
-# COPY default.conf /etc/nginx/conf.d/default.conf
-# COPY certs /etc/nginx/certs
+COPY conf /etc/nginx/templates
+COPY entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

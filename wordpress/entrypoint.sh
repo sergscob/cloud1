@@ -29,7 +29,27 @@ if [ ! -f wp-config.php ]; then
         --quiet
 fi
 
-until wp db query 'SELECT 1' --allow-root --path="$WORDPRESS_PATH" >/dev/null 2>&1; do
+until php -r '
+$dbHost = getenv("WORDPRESS_DB_HOST") ?: "mariadb:3306";
+$dbName = getenv("WORDPRESS_DB_NAME") ?: "wordpress";
+$dbUser = getenv("WORDPRESS_DB_USER") ?: "wpuser";
+$dbPassword = getenv("WORDPRESS_DB_PASSWORD") ?: "wppassword";
+
+$dbPort = 3306;
+$hostParts = explode(":", $dbHost, 2);
+if (count($hostParts) === 2) {
+    $dbHost = $hostParts[0];
+    $dbPort = (int) $hostParts[1];
+}
+
+$mysqli = @new mysqli($dbHost, $dbUser, $dbPassword, $dbName, $dbPort);
+if ($mysqli->connect_errno) {
+    fwrite(STDERR, $mysqli->connect_error . PHP_EOL);
+    exit(1);
+}
+
+exit(0);
+'; do
     echo "Waiting for MariaDB..."
     sleep 2
 done

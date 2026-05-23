@@ -1,8 +1,9 @@
 #!/bin/sh
 
 DOMAIN="test.butal.ru"
+CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
 
-if [ -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
+if [ -s "$CERT_DIR/fullchain.pem" ] && [ -s "$CERT_DIR/privkey.pem" ]; then
     echo "HTTPS mode"
     cp /etc/nginx/templates/https.conf /etc/nginx/conf.d/default.conf
 else

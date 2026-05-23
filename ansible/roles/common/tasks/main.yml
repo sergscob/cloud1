@@ -1,10 +1,17 @@
 - name: Install dependencies
   apt:
     name:
-      - docker.io
-      - docker-compose-plugin
+      - ca-certificates
       - git
       - curl
+      - gnupg
+    update_cache: yes
+
+- name: Install Docker dependencies
+  apt:
+    name:
+      - docker.io
+      - docker-compose-plugin
     update_cache: yes
 
 - name: Enable Docker

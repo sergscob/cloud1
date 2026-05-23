@@ -1,11 +1,11 @@
 - name: Start nginx only (HTTP bootstrap)
   shell: |
     cd {{ project_dir }}
-    docker compose up -d nginx
+    docker compose up -d --build nginx
 
 - name: Wait for nginx HTTP
   uri:
-    url: http://{{ domain }}
+    url: http://127.0.0.1
     status_code: 200
   register: nginx_http_result
   retries: 10

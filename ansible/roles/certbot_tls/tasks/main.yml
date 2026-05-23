@@ -1,0 +1,15 @@
+- name: Obtain SSL certificate via certbot
+  shell: |
+    cd {{ project_dir }}
+    docker compose run --rm certbot certonly \
+      --webroot \
+      --webroot-path=/var/www/certbot \
+      --email admin@{{ domain }} \
+      --agree-tos \
+      --no-eff-email \
+      -d {{ domain }}
+
+- name: Restart nginx to enable HTTPS
+  shell: |
+    cd {{ project_dir }}
+    docker compose restart nginx

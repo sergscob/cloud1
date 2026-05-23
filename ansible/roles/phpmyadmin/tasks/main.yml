@@ -1,0 +1,4 @@
+- name: Start phpMyAdmin
+  shell: |
+    cd {{ project_dir }}
+    docker compose up -d phpmyadmin

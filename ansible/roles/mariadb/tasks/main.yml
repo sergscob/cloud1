@@ -1,0 +1,4 @@
+- name: Start MariaDB
+  shell: |
+    cd {{ project_dir }}
+    docker compose up -d mariadb

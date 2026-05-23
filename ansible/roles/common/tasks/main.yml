@@ -1,0 +1,20 @@
+- name: Install dependencies
+  apt:
+    name:
+      - docker.io
+      - docker-compose-plugin
+      - git
+      - curl
+    update_cache: yes
+
+- name: Enable Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Clone project
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ project_dir }}"
+    force: yes

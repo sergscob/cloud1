@@ -1,0 +1,4 @@
+- name: Start WordPress
+  shell: |
+    cd {{ project_dir }}
+    docker compose up -d wordpress

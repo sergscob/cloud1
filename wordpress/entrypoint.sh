@@ -29,7 +29,7 @@ if [ ! -f wp-config.php ]; then
         --quiet
 fi
 
-until wp db check --allow-root --path="$WORDPRESS_PATH" >/dev/null 2>&1; do
+until wp db query 'SELECT 1' --allow-root --path="$WORDPRESS_PATH" >/dev/null 2>&1; do
     echo "Waiting for MariaDB..."
     sleep 2
 done

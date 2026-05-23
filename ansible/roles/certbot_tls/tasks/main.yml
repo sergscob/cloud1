@@ -1,15 +1,43 @@
+- name: Check HTTPS availability
+  uri:
+    url: https://{{ domain }}
+    method: GET
+    follow_redirects: none
+    validate_certs: false
+    status_code:
+      - 200
+      - 301
+      - 302
+  register: https_check
+  failed_when: false
+  changed_when: false
+
+- name: Explain certbot decision (skip)
+  debug:
+    msg: "HTTPS already available for {{ domain }} (status={{ https_check.status | default('n/a') }}). Skipping certbot issuance."
+  when: (https_check.status | default(0)) in [200, 301, 302]
+
+- name: Explain certbot decision (run)
+  debug:
+    msg: "HTTPS is not available for {{ domain }} (status={{ https_check.status | default('n/a') }}). Running certbot issuance."
+  when: (https_check.status | default(0)) not in [200, 301, 302]
+
 - name: Obtain SSL certificate via certbot
   shell: |
     cd {{ project_dir }}
     docker compose run --rm certbot certonly \
       --webroot \
       --webroot-path=/var/www/certbot \
+      --non-interactive \
       --email admin@{{ domain }} \
       --agree-tos \
       --no-eff-email \
+      --keep-until-expiring \
       -d {{ domain }}
+  when: (https_check.status | default(0)) not in [200, 301, 302]
 
 - name: Restart nginx to enable HTTPS
   shell: |
     cd {{ project_dir }}
     docker compose restart nginx
+  when: (https_check.status | default(0)) not in [200, 301, 302]

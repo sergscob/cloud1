@@ -6,8 +6,11 @@
 - name: Wait for nginx HTTP
   uri:
     url: http://127.0.0.1
-    status_code: 200
+    follow_redirects: none
+    status_code:
+      - 200
+      - 301
   register: nginx_http_result
   retries: 10
   delay: 3
-  until: nginx_http_result.status == 200
+  until: nginx_http_result.status in [200, 301]

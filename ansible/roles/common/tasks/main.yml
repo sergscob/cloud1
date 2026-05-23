@@ -15,10 +15,16 @@
     update_cache: yes
 
 - name: Enable Docker
-  service:
+  systemd:
     name: docker
     state: started
     enabled: yes
+
+- name: Verify Docker autostart is enabled
+  command: systemctl is-enabled docker
+  register: docker_autostart_state
+  changed_when: false
+  failed_when: docker_autostart_state.stdout.strip() != 'enabled'
 
 - name: Clone project
   git:

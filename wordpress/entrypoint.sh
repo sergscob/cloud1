@@ -42,7 +42,15 @@ if (count($hostParts) === 2) {
     $dbPort = (int) $hostParts[1];
 }
 
-$mysqli = @new mysqli($dbHost, $dbUser, $dbPassword, $dbName, $dbPort);
+mysqli_report(MYSQLI_REPORT_OFF);
+
+try {
+    $mysqli = new mysqli($dbHost, $dbUser, $dbPassword, $dbName, $dbPort);
+} catch (Throwable $exception) {
+    fwrite(STDERR, $exception->getMessage() . PHP_EOL);
+    exit(1);
+}
+
 if ($mysqli->connect_errno) {
     fwrite(STDERR, $mysqli->connect_error . PHP_EOL);
     exit(1);

@@ -1,0 +1,90 @@
+- name: Cloud-1 full deployment (staged bootstrap)
+  hosts: cloud
+  become: true
+
+  vars:
+    project_dir: /home/cloud
+    domain: test.butal.ru
+
+  tasks:
+
+  # =========================
+  # STAGE 1 - SERVER PREP
+  # =========================
+  - name: Install dependencies
+    apt:
+      name:
+        - docker.io
+        - docker-compose-plugin
+        - git
+        - curl
+      update_cache: yes
+
+  - name: Enable Docker
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: Clone project
+    git:
+      repo: "https://github.com/YOUR_REPO/cloud-1.git"
+      dest: "{{ project_dir }}"
+      force: yes
+
+
+  # =========================
+  # STAGE 2 - BOOTSTRAP NGINX (HTTP ONLY)
+  # =========================
+  - name: Start nginx only (HTTP bootstrap)
+    shell: |
+      cd {{ project_dir }}
+      docker compose up -d nginx
+
+  - name: Wait for nginx HTTP
+    uri:
+      url: http://{{ domain }}
+      status_code: 200
+    register: result
+    retries: 10
+    delay: 3
+    until: result.status == 200
+
+
+  # =========================
+  # STAGE 3 - CERTBOT TLS ISSUANCE
+  # =========================
+  - name: Obtain SSL certificate via certbot
+    shell: |
+      cd {{ project_dir }}
+      docker compose run --rm certbot certonly \
+        --webroot \
+        --webroot-path=/var/www/certbot \
+        --email admin@{{ domain }} \
+        --agree-tos \
+        --no-eff-email \
+        -d {{ domain }}
+
+  - name: Restart nginx to enable HTTPS
+    shell: |
+      cd {{ project_dir }}
+      docker compose restart nginx
+
+
+  # =========================
+  # STAGE 4 - FULL STACK
+  # =========================
+  - name: Start full application stack
+    shell: |
+      cd {{ project_dir }}
+      docker compose up -d wordpress mariadb phpmyadmin
+
+
+  # =========================
+  # FINAL CHECK
+  # =========================
+  - name: Check HTTPS availability
+    uri:
+      url: https://{{ domain }}
+      validate_certs: no
+      status_code: 200

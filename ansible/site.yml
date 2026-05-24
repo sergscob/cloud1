@@ -1,4 +1,4 @@
-- name: Cloud-1 full deployment (staged bootstrap)
+- name: Cloud-1 deployment
   hosts: cloud
   become: true
 
@@ -11,9 +11,20 @@
     repo_url: "https://github.com/sergscob/cloud1.git"
 
   roles:
-    - common
-    - mariadb
-    - wordpress
-    - phpmyadmin
-    - nginx
-    - certbot_tls
+    - role: common
+      tags: common
+
+    - role: mariadb
+      tags: mariadb
+
+    - role: wordpress
+      tags: wordpress
+
+    - role: phpmyadmin
+      tags: phpmyadmin
+
+    - role: nginx
+      tags: nginx
+
+    - role: certbot
+      tags: certbot

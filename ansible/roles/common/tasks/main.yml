@@ -5,7 +5,7 @@
       - git
     state: present
 
-- name: Check whether Docker is already installed
+- name: Check is Docker installed
   command: docker --version
   register: docker_version_check
   changed_when: false
@@ -41,7 +41,6 @@
       - mysql_database is defined
       - mysql_user is defined
       - mysql_password is defined
-      - wordpress_url is defined
       - wordpress_admin_user is defined
       - wordpress_admin_password is defined
       - wordpress_admin_email is defined

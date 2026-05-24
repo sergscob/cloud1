@@ -3,7 +3,7 @@
     cd {{ project_dir }}
     docker compose up -d mariadb
 
-- name: Wait for MariaDB to stay up
+- name: Wait for MariaDB container is up
   shell: |
     cd {{ project_dir }}
     status=$(docker inspect -f '{% raw %}{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}{% endraw %}' mariadb 2>/dev/null || true)

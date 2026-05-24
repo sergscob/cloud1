@@ -3,7 +3,7 @@
     cd {{ project_dir }}
     docker compose up -d --build nginx
 
-- name: Wait for nginx to stay up
+- name: Wait for nginx container is up
   shell: |
     cd {{ project_dir }}
     status=$(docker inspect -f '{% raw %}{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}{% endraw %}' nginx 2>/dev/null || true)

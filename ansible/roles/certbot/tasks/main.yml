@@ -41,3 +41,11 @@
     cd {{ project_dir }}
     docker compose restart nginx
   when: (https_check.status | default(0)) not in [200, 301, 302]
+
+- name: Install certbot renew cron
+  copy:
+    dest: /etc/cron.d/certbot-renew
+    content: |
+      # Run certbot renew daily at 03:00
+      0 3 * * * root cd {{ project_dir }} && docker compose run --rm certbot renew --webroot --webroot-path=/var/www/certbot --deploy-hook 'docker compose restart nginx' > /dev/null 2>&1
+    mode: '0644'

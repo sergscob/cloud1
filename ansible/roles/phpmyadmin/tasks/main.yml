@@ -3,7 +3,7 @@
     cd {{ project_dir }}
     docker compose up -d phpmyadmin
 
-- name: Wait for phpMyAdmin to stay up
+- name: Wait for phpMyAdmin container is up
   shell: |
     cd {{ project_dir }}
     status=$(docker inspect -f '{% raw %}{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}{% endraw %}' phpmyadmin 2>/dev/null || true)

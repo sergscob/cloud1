@@ -3,6 +3,20 @@
     cd {{ project_dir }}
     docker compose up -d --build nginx
 
+- name: Wait for nginx to stay up
+  shell: |
+    cd {{ project_dir }}
+    status=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}' nginx 2>/dev/null || true)
+    case "$status" in
+      running*|*healthy*) exit 0 ;;
+      exited*|dead*) echo "$status"; exit 1 ;;
+      *) echo "$status"; exit 1 ;;
+    esac
+  register: nginx_state
+  retries: 20
+  delay: 3
+  until: nginx_state.rc == 0
+
 - name: Wait for nginx HTTP
   uri:
     url: http://127.0.0.1

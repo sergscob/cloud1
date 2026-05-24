@@ -2,6 +2,8 @@
 
 set -eu
 
+export WP_CLI_MEMORY_LIMIT="512M"
+
 WORDPRESS_PATH="/var/www/html"
 WORDPRESS_DB_HOST="${WORDPRESS_DB_HOST:-mariadb:3306}"
 WORDPRESS_DB_NAME="${WORDPRESS_DB_NAME:-wordpress}"

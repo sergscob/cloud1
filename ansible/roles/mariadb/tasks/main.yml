@@ -2,3 +2,17 @@
   shell: |
     cd {{ project_dir }}
     docker compose up -d mariadb
+
+- name: Wait for MariaDB to stay up
+  shell: |
+    cd {{ project_dir }}
+    status=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}' mariadb 2>/dev/null || true)
+    case "$status" in
+      running*|*healthy*) exit 0 ;;
+      exited*|dead*) echo "$status"; exit 1 ;;
+      *) echo "$status"; exit 1 ;;
+    esac
+  register: mariadb_state
+  retries: 20
+  delay: 3
+  until: mariadb_state.rc == 0

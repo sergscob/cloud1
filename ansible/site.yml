@@ -2,6 +2,9 @@
   hosts: cloud
   become: true
 
+  vars_files:
+    - group_vars/cloud/vault.yml
+
   vars:
     project_dir: /home/cloud
     domain: test.butal.ru

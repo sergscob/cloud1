@@ -52,9 +52,23 @@
     dest: "{{ project_dir }}"
     force: yes
 
-- name: Create compose environment file from example
-  copy:
-    src: "{{ project_dir }}/.env.example"
+- name: Validate compose secrets are provided
+  assert:
+    that:
+      - mysql_root_password is defined
+      - mysql_database is defined
+      - mysql_user is defined
+      - mysql_password is defined
+      - wordpress_url is defined
+      - wordpress_site_title is defined
+      - wordpress_admin_user is defined
+      - wordpress_admin_password is defined
+      - wordpress_admin_email is defined
+      - pma_absolute_uri is defined
+    fail_msg: "Provide compose secrets via --extra-vars or ansible-vault before running the playbook."
+
+- name: Create compose environment file from variables
+  template:
+    src: env.j2
     dest: "{{ project_dir }}/.env"
-    remote_src: yes
-    force: yes
+    mode: '0600'

@@ -1,0 +1,14 @@
+# Example vault values for local editing.
+# Encrypt this file with ansible-vault before storing real secrets.
+
+mysql_root_password: rootpassword
+mysql_database: wordpress
+mysql_user: wpuser
+mysql_password: wppassword
+
+wordpress_url: https://test.butal.ru/
+wordpress_site_title: WordPress
+wordpress_admin_user: admin
+wordpress_admin_password: admin12345
+wordpress_admin_email: admin@example.com
+pma_absolute_uri: https://test.butal.ru/phpmyadmin/

@@ -1,50 +1,32 @@
-- name: Install dependencies
-  apt:
+- name: Install base dependencies
+  package:
     name:
       - ca-certificates
       - git
-      - curl
-      - gnupg
-    update_cache: yes
+    state: present
 
-- name: Create Docker keyring directory
-  file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
+- name: Check whether Docker is already installed
+  command: docker --version
+  register: docker_version_check
+  changed_when: false
+  failed_when: false
 
-- name: Download Docker GPG key
+- name: Download Docker install script
   get_url:
-    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
-    dest: /etc/apt/keyrings/docker.asc
-    mode: '0644'
+    url: https://get.docker.com
+    dest: /tmp/get-docker.sh
+    mode: '0755'
+  when: docker_version_check.rc != 0
 
-- name: Add Docker apt repository
-  copy:
-    dest: /etc/apt/sources.list.d/docker.list
-    content: "deb [arch={{ 'amd64' if ansible_architecture in ['x86_64', 'amd64'] else 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable\n"
+- name: Install Docker
+  command: sh /tmp/get-docker.sh
+  when: docker_version_check.rc != 0
 
-- name: Install Docker dependencies
-  apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    update_cache: yes
-
-- name: Enable Docker
-  systemd:
+- name: Enable Docker service
+  service:
     name: docker
     state: started
     enabled: yes
-
-- name: Verify Docker autostart is enabled
-  command: systemctl is-enabled docker
-  register: docker_autostart_state
-  changed_when: false
-  failed_when: docker_autostart_state.stdout.strip() != 'enabled'
 
 - name: Clone project
   git:
@@ -60,11 +42,9 @@
       - mysql_user is defined
       - mysql_password is defined
       - wordpress_url is defined
-      - wordpress_site_title is defined
       - wordpress_admin_user is defined
       - wordpress_admin_password is defined
       - wordpress_admin_email is defined
-      - pma_absolute_uri is defined
     fail_msg: "Provide compose secrets via --extra-vars or ansible-vault before running the playbook."
 
 - name: Create compose environment file from variables

@@ -14,7 +14,7 @@ help:
 	@echo "  make lint                   # Run ansible-lint (if installed)"
 
 deploy:
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) $(ANSIBLE_EXTRA)
+	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --vault-password-file $(VAULT_PASSWORD_FILE) $(ANSIBLE_EXTRA)
 
 deploy-pass:
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --ask-vault-pass $(ANSIBLE_EXTRA)
@@ -23,10 +23,10 @@ playbook-vault-file:
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --vault-password-file $(VAULT_PASSWORD_FILE) $(ANSIBLE_EXTRA)
 
 syntax-check:
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --syntax-check
+	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --syntax-check --vault-password-file $(VAULT_PASSWORD_FILE)
 
 check:
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --check --diff
+	ansible-playbook -i $(INVENTORY) $(PLAYBOOK) --check --diff --vault-password-file $(VAULT_PASSWORD_FILE)
 
 encrypt-vault:
 	ansible-vault encrypt ansible/group_vars/cloud/vault.yml --vault-password-file ~/.vault_pass

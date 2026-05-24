@@ -6,7 +6,7 @@
 - name: Wait for phpMyAdmin to stay up
   shell: |
     cd {{ project_dir }}
-    status=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}' phpmyadmin 2>/dev/null || true)
+    status=$(docker inspect -f '{% raw %}{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}{% endraw %}' phpmyadmin 2>/dev/null || true)
     case "$status" in
       running*|*healthy*) exit 0 ;;
       exited*|dead*) echo "$status"; exit 1 ;;

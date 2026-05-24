@@ -23,24 +23,39 @@
   when: (https_check.status | default(0)) not in [200, 301, 302]
 
 - name: Obtain SSL certificate via certbot
-  shell: |
-    cd {{ project_dir }}
-    docker compose run --rm certbot certonly \
-      --webroot \
-      --webroot-path=/var/www/certbot \
-      --non-interactive \
-      --email admin@{{ domain }} \
-      --agree-tos \
-      --no-eff-email \
-      --keep-until-expiring \
-      -d {{ domain }}
   when: (https_check.status | default(0)) not in [200, 301, 302]
+  block:
+    - name: Run certbot issuance
+      shell: |
+        cd {{ project_dir }}
+        docker compose run --rm certbot certonly \
+          --webroot \
+          --webroot-path=/var/www/certbot \
+          --non-interactive \
+          --email admin@{{ domain }} \
+          --agree-tos \
+          --no-eff-email \
+          --keep-until-expiring \
+          -d {{ domain }}
+      register: certbot_issue
+      changed_when: certbot_issue.rc == 0
+
+    - name: Fail if certbot did not issue a certificate
+      assert:
+        that:
+          - certbot_issue.rc == 0
+        fail_msg: |-
+          Certbot failed to obtain a certificate for {{ domain }}.
+          rc={{ certbot_issue.rc }}
+          stderr={{ certbot_issue.stderr | default('') }}
 
 - name: Restart nginx to enable HTTPS
   shell: |
     cd {{ project_dir }}
     docker compose restart nginx
-  when: (https_check.status | default(0)) not in [200, 301, 302]
+  when:
+    - certbot_issue is defined
+    - certbot_issue.rc == 0
 
 - name: Install certbot renew cron
   copy:

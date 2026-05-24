@@ -13,6 +13,7 @@
       *) echo "$status"; exit 1 ;;
     esac
   register: mariadb_state
+  changed_when: false
   retries: 20
   delay: 3
   until: mariadb_state.rc == 0

@@ -6,6 +6,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME:-test.butal.ru}
     volumes:
       - wordpress_data:/var/www/html
       - certbot_www:/var/www/certbot
@@ -20,6 +22,7 @@ services:
     depends_on:
       - mariadb
     environment:
+      DOMAIN_NAME: ${DOMAIN_NAME:-test.butal.ru}
       WORDPRESS_DB_HOST: mariadb:3306
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
       WORDPRESS_DB_USER: ${MYSQL_USER}

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DOMAIN="test.butal.ru"
+DOMAIN="${DOMAIN_NAME:-test.butal.ru}"
 CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
 
 if [ -s "$CERT_DIR/fullchain.pem" ] && [ -s "$CERT_DIR/privkey.pem" ]; then
@@ -10,5 +10,7 @@ else
     echo "HTTP mode"
     cp /etc/nginx/templates/http.conf /etc/nginx/conf.d/default.conf
 fi
+
+sed -i "s/__DOMAIN_NAME__/${DOMAIN}/g" /etc/nginx/conf.d/default.conf
 
 nginx -g "daemon off;"

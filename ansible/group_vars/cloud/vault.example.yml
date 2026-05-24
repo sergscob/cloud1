@@ -3,7 +3,6 @@ mysql_database: wordpress
 mysql_user: wpuser
 mysql_password: wppassword
 
-wordpress_url: https://test.butal.ru/
 wordpress_admin_user: sskobyak
 wordpress_admin_password: sskobyak1234
 wordpress_admin_email: admin@example.com

@@ -7,7 +7,7 @@
 
   vars:
     project_dir: /home/cloud
-    domain: test.butal.ru
+    domain: cloud-2.butal.ru
     repo_url: "https://github.com/sergscob/cloud1.git"
 
   roles:

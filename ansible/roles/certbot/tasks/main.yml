@@ -46,16 +46,22 @@
           - certbot_issue.rc == 0
         fail_msg: |-
           Certbot failed to obtain a certificate for {{ domain }}.
-          rc={{ certbot_issue.rc }}
+          rc={{ certbot_issue.rc | default('unset') }}
+          stdout={{ certbot_issue.stdout | default('') }}
           stderr={{ certbot_issue.stderr | default('') }}
 
 - name: Restart nginx to enable HTTPS
   shell: |
     cd {{ project_dir }}
     docker compose restart nginx
-  when:
-    - certbot_issue is defined
-    - certbot_issue.rc == 0
+  when: certbot_issue is defined and (certbot_issue.rc | default(1)) == 0
+
+- name: Explain why nginx was not restarted
+  debug:
+    msg: >-
+      Nginx was not restarted because certbot was not run successfully.
+      certbot_issue: {{ certbot_issue | default('not set') }}
+  when:  (https_check.status | default(0)) not in [200, 301, 302] and (certbot_issue is not defined or (certbot_issue.rc | default(1)) != 0)
 
 - name: Install certbot renew cron
   copy:

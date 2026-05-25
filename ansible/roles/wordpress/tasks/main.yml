@@ -4,16 +4,6 @@
     docker compose up -d wordpress
 
 - name: Wait for WordPress container is up
-  shell: |
-    cd {{ project_dir }}
-    status=$(docker inspect -f '{% raw %}{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}{% endraw %}' wordpress 2>/dev/null || true)
-    case "$status" in
-      running*|*healthy*) exit 0 ;;
-      exited*|dead*) echo "$status"; exit 1 ;;
-      *) echo "$status"; exit 1 ;;
-    esac
-  register: wordpress_state
-  changed_when: false
-  retries: 20
-  delay: 3
-  until: wordpress_state.rc == 0
+  include_tasks: "../common/tasks/wait_for_container.yml"
+  vars:
+    container_name: wordpress

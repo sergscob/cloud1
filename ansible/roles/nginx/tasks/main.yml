@@ -4,19 +4,9 @@
     docker compose up -d --build nginx
 
 - name: Wait for nginx container is up
-  shell: |
-    cd {{ project_dir }}
-    status=$(docker inspect -f '{% raw %}{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}{% endraw %}' nginx 2>/dev/null || true)
-    case "$status" in
-      running*|*healthy*) exit 0 ;;
-      exited*|dead*) echo "$status"; exit 1 ;;
-      *) echo "$status"; exit 1 ;;
-    esac
-  register: nginx_state
-  changed_when: false
-  retries: 20
-  delay: 3
-  until: nginx_state.rc == 0
+  include_tasks: "../common/tasks/wait_for_container.yml"
+  vars:
+    container_name: nginx
 
 - name: Wait for nginx HTTP
   uri:

@@ -1,0 +1,14 @@
+- name: Wait for {{ container_name }} container is up
+  shell: |
+    cd {{ project_dir }}
+    status=$(docker inspect -f '{% raw %}{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} {{.State.ExitCode}}{% endraw %}' {{ container_name }} 2>/dev/null || true)
+    case "$status" in
+      running*|*healthy*) exit 0 ;;
+      exited*|dead*) echo "$status"; exit 1 ;;
+      *) echo "$status"; exit 1 ;;
+    esac
+  register: container_state
+  changed_when: false
+  retries: "{{ container_retries | default(20) }}"
+  delay: "{{ container_delay | default(3) }}"
+  until: container_state.rc == 0

@@ -1,4 +1,4 @@
-- name: Check HTTPS availability
+- name: Check HTTPS 
   uri:
     url: https://{{ domain }}
     method: GET
@@ -12,20 +12,20 @@
   failed_when: false
   changed_when: false
 
-- name: Explain certbot decision (skip)
+- name: Certbot decision (skip)
   debug:
-    msg: "HTTPS already available for {{ domain }} (status={{ https_check.status | default('n/a') }}). Skipping certbot issuance."
+    msg: "HTTPS already available for {{ domain }} (status={{ https_check.status | default('n/a') }}). Skip certbot."
   when: (https_check.status | default(0)) in [200, 301, 302]
 
-- name: Explain certbot decision (run)
+- name: Certbot decision (run)
   debug:
-    msg: "HTTPS is not available for {{ domain }} (status={{ https_check.status | default('n/a') }}). Running certbot issuance."
+    msg: "HTTPS is not available for {{ domain }} (status={{ https_check.status | default('n/a') }}). Run certbot."
   when: (https_check.status | default(0)) not in [200, 301, 302]
 
-- name: Obtain SSL certificate via certbot
+- name: Get SSL certificate via certbot
   when: (https_check.status | default(0)) not in [200, 301, 302]
   block:
-    - name: Run certbot issuance
+    - name: Run certbot 
       shell: |
         cd {{ project_dir }}
         docker compose run --rm certbot certonly \
@@ -37,31 +37,31 @@
           --no-eff-email \
           --keep-until-expiring \
           -d {{ domain }}
-      register: certbot_issue
-      changed_when: certbot_issue.rc == 0
+      register: certbot_result
+      changed_when: certbot_result.rc == 0
 
-    - name: Fail if certbot did not issue a certificate
+    - name: Fail if certbot did not make a certificate
       assert:
         that:
-          - certbot_issue.rc == 0
+          - certbot_result.rc == 0
         fail_msg: |-
-          Certbot failed to obtain a certificate for {{ domain }}.
-          rc={{ certbot_issue.rc | default('unset') }}
-          stdout={{ certbot_issue.stdout | default('') }}
-          stderr={{ certbot_issue.stderr | default('') }}
+          Certbot failed to get a certificate for {{ domain }}.
+          rc={{ certbot_result.rc | default('unset') }}
+          stdout={{ certbot_result.stdout | default('') }}
+          stderr={{ certbot_result.stderr | default('') }}
 
 - name: Restart nginx to enable HTTPS
   shell: |
     cd {{ project_dir }}
     docker compose restart nginx
-  when: certbot_issue is defined and (certbot_issue.rc | default(1)) == 0
+  when: certbot_result is defined and (certbot_result.rc | default(1)) == 0
 
 - name: Explain why nginx was not restarted
   debug:
     msg: >-
       Nginx was not restarted because certbot was not run successfully.
-      certbot_issue: {{ certbot_issue | default('not set') }}
-  when:  (https_check.status | default(0)) not in [200, 301, 302] and (certbot_issue is not defined or (certbot_issue.rc | default(1)) != 0)
+      certbot_result: {{ certbot_result | default('not set') }}
+  when:  (https_check.status | default(0)) not in [200, 301, 302] and (certbot_result is not defined or (certbot_result.rc | default(1)) != 0)
 
 - name: Install certbot renew cron
   copy:
